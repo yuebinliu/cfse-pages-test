@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CFSE · WordPress 静态化 + 自托管 CMS</title><style>
+:root{--bg:#0f1115;--card:#171a21;--fg:#e6e8ee;--dim:#9aa3b2;--accent:#4f8cff;--ok:#3fb950;--line:#262b36}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:48px 22px 80px}
+nav{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:32px;font-size:14px}
+nav a{color:var(--dim);text-decoration:none;padding:6px 12px;border:1px solid var(--line);border-radius:999px}
+nav a:hover{color:var(--fg);border-color:var(--accent)}
+nav a.on{color:#fff;background:var(--accent);border-color:var(--accent)}
+h1{font-size:30px;margin:0 0 6px}
+h2{font-size:19px;margin:36px 0 12px;padding-left:10px;border-left:3px solid var(--accent)}
+h3{font-size:16px;margin:22px 0 6px}
+p{margin:10px 0;color:#cfd4de}
+.lead{color:var(--dim);font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--dim);font-weight:600}
+code{background:#0b0d12;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13.5px}
+ul{padding-left:22px}li{margin:7px 0;color:#cfd4de}
+.tag{display:inline-block;font-size:12px;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:1px 9px;margin-right:6px}
+.ok{color:var(--ok)}
+footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:var(--dim);font-size:13px}
+.flow{font-size:13.5px;color:var(--dim);white-space:pre;overflow-x:auto;background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+</style></head>
+<body><div class="wrap">
+<nav><a class="on" href="index.html">总览</a><a class="" href="tech.html">技术栈</a><a class="" href="features.html">优点</a></nav>
+
+<h1>WordPress 静态化 + 自托管 CMS</h1>
+<p class="lead">一个把 WordPress 内容发布到边缘的开源方案：<b>WP 当后台，Cloudflare Workers 当运行时</b>。
+单页直读对象存储、列表页实时查库、可选整站全静态 —— 动静自由切换，互不牵制。</p>
+
+<div class="card">
+  <span class="tag">Workers</span><span class="tag">D1</span><span class="tag">R2</span><span class="tag">KV</span>
+  <span class="tag">WordPress</span><span class="tag">Markdown</span><span class="tag">S3 SigV4</span>
+</div>
+
+<h2>它长什么样</h2>
+<div class="flow">浏览器 ──► Cloudflare 边缘（Worker）
+              ├─ 静态资源  → assets（免费无限）→ 未命中落 R2
+              ├─ 文章单页  → R2 直读；未命中 ⇒ 查 D1 现场渲染并回填（自愈）
+              ├─ 列表/分类/标签/归档 → D1 实时渲染（可 KV 缓存，TTL 0 即直查）
+              └─ 后台 /admin/ + REST /wp-json/wp/v2/*
+
+WordPress（内容生产线）
+  └─ 插件钩子：保存文章 → 渲染单页 / 写 D1 / 上传 R2（三项独立开关）</div>
+
+<h2>三种模式，随站自由选</h2>
+<div class="grid">
+  <div class="card"><h3>① 全动态</h3><p>只同步数据到 D1，单页与列表都由 Worker 实时渲染。写作即发布，零构建。</p></div>
+  <div class="card"><h3>② 动静结合</h3><p>文章单页落 R2（快），列表页查 D1（新）。最常用的形态。</p></div>
+  <div class="card"><h3>③ 全静态</h3><p>整站产物可发布到任意静态托管（S3 兼容 / 本地目录 / GitHub Pages…），不依赖运行时。</p></div>
+</div>
+
+<h2>为什么值得一看</h2>
+<ul>
+  <li><b>不是"生成器"，是"运行时替换"</b>：列表页永远实时，单页永远静态，各自用最合适的方式。</li>
+  <li><b>双后台</b>：WordPress 后台与 Worker 后台互为镜像；从任一侧写，另一侧可对齐。</li>
+  <li><b>Markdown 原生</b>：Obsidian 等 md 编辑器可通过 <code>/wp-json/wp/v2/*</code> 直连发布，原稿按 md 存储，两端渲染一致。</li>
+  <li><b>多托管出口</b>：一份产物，按能力分发到多个目标（对象存储 / 本地 / 自己的 Worker / git 型托管）。</li>
+  <li><b>零出站费</b>：R2 → Cloudflare CDN 出站不计费，容量上限由 10GB 存储主导。</li>
+</ul>
+<p><a href="tech.html" style="color:var(--accent)">→ 看技术栈</a> &nbsp; <a href="features.html" style="color:var(--accent)">→ 看优点详解</a></p>
+
+<footer>由 <strong>CF Static Export Pro</strong> 发布 · 2026-09-15 22:15:53 UTC · 本站是一个真实的 GitHub Pages 部署验证</footer>
+</div></body></html>
